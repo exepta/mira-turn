@@ -1,0 +1,21 @@
+[package]
+name = "mira-moba"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "mira-moba"
+path = "src/main.rs"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+debug = true
+
+[dependencies]
+
+[dependencies.bevy]
+version = "0.15.1"
+default-features = true
