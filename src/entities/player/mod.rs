@@ -1,5 +1,6 @@
 use bevy::core_pipeline::bloom::Bloom;
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::{AsyncCollider, Collider, ComputedColliderShape, KinematicCharacterController, RigidBody, TriMeshFlags};
 use bevy_third_person_camera::{Offset, ThirdPersonCamera, ThirdPersonCameraTarget, Zoom};
 use crate::entities::WorldPlayer;
 use crate::manager::GameState;
@@ -10,6 +11,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::InGame), create_world_player);
         app.add_systems(OnEnter(GameState::InGame), create_player_camera);
+        app.add_systems(Update, update_system.run_if(in_state(GameState::InGame)));
     }
 }
 
@@ -17,11 +19,22 @@ impl Plugin for PlayerPlugin {
 pub struct PlayerCamera;
 
 fn create_world_player(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("entities/player/placeholder.glb"))))
+    commands.spawn(SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("entities/player/player_idle_2.glb"))))
         .insert(Name::new("WorldPlayer"))
         .insert(Transform::from_xyz(0.0, 0.0, 0.0))
         .insert(ThirdPersonCameraTarget)
-        .insert(WorldPlayer::default());
+        .insert(WorldPlayer::default())
+        .insert(RigidBody::KinematicPositionBased)
+        .insert(Collider::capsule(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 1.6, 0.0), 0.2))
+        .insert(KinematicCharacterController {
+            ..KinematicCharacterController::default()
+        });
+}
+
+fn update_system(time: Res<Time>, mut controllers: Query<&mut KinematicCharacterController>) {
+    for mut controller in controllers.iter_mut() {
+        controller.translation = Some(Vec3::new(1.0, -5.0, -1.0) * time.delta_secs());
+    }
 }
 
 fn create_player_camera(mut commands: Commands) {

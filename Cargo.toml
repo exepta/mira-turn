@@ -18,6 +18,8 @@ debug = true
 bevy-inspector-egui = {version = "0.28.1"}
 bevy_third_person_camera = {version = "0.2.0"}
 
+bevy_rapier3d = {version = "0.28.0", features = ["simd-stable", "debug-render-3d"]}
+
 # Fluent
 fluent = {version = "^0.15"}
 fluent-bundle = {version = "^0.15"}
