@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
 use bevy_rapier3d::geometry::ComputedColliderShape;
-use bevy_rapier3d::prelude::{AsyncCollider, RigidBody, TriMeshFlags};
+use bevy_rapier3d::prelude::{AsyncCollider, AsyncSceneCollider, RigidBody, TriMeshFlags};
 use crate::manager::GameState;
 
 pub struct EnvironmentPlugin;
@@ -13,12 +13,14 @@ impl Plugin for EnvironmentPlugin {
     }
 }
 
-fn create_game_floor(mut commands: Commands, mut materials: ResMut<Assets<StandardMaterial>>, mut meshes: ResMut<Assets<Mesh>>) {
-    commands.spawn(Mesh3d(meshes.add(Plane3d::default().mesh().size(100.0, 100.0))))
-        .insert(MeshMaterial3d(materials.add(Color::srgb(0.1, 0.1, 0.1))))
+fn create_game_floor(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn(SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("world/test-room.glb"))))
         .insert(Name::new("Floor"))
         .insert(RigidBody::Fixed)
-        .insert(AsyncCollider(ComputedColliderShape::TriMesh(TriMeshFlags::MERGE_DUPLICATE_VERTICES)));
+        .insert(AsyncSceneCollider {
+            shape: Some(ComputedColliderShape::TriMesh(TriMeshFlags::MERGE_DUPLICATE_VERTICES)),
+            ..default()
+        });
 
     commands.spawn((
         DirectionalLight {

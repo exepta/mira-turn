@@ -1,7 +1,10 @@
+mod input;
+
 use bevy::core_pipeline::bloom::Bloom;
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::{AsyncCollider, Collider, ComputedColliderShape, KinematicCharacterController, RigidBody, TriMeshFlags};
+use bevy_rapier3d::prelude::{AsyncCollider, CharacterAutostep, CharacterLength, Collider, ComputedColliderShape, KinematicCharacterController, RigidBody, TriMeshFlags};
 use bevy_third_person_camera::{Offset, ThirdPersonCamera, ThirdPersonCameraTarget, Zoom};
+use crate::entities::player::input::PlayerInputPlugin;
 use crate::entities::WorldPlayer;
 use crate::manager::GameState;
 
@@ -9,14 +12,14 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(PlayerInputPlugin);
         app.add_systems(OnEnter(GameState::InGame), create_world_player);
         app.add_systems(OnEnter(GameState::InGame), create_player_camera);
-        app.add_systems(Update, update_system.run_if(in_state(GameState::InGame)));
     }
 }
 
 #[derive(Component, Reflect, Debug, Clone)]
-pub struct PlayerCamera;
+pub struct PlayerWorldCamera;
 
 fn create_world_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("entities/player/player_idle_2.glb"))))
@@ -27,14 +30,16 @@ fn create_world_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(RigidBody::KinematicPositionBased)
         .insert(Collider::capsule(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 1.6, 0.0), 0.2))
         .insert(KinematicCharacterController {
+            max_slope_climb_angle: 45_f32.to_radians(),
+            min_slope_slide_angle: 30_f32.to_radians(),
+            autostep: Some(CharacterAutostep {
+                max_height: CharacterLength::Absolute(0.5),
+                min_width: CharacterLength::Absolute(0.2),
+                include_dynamic_bodies: true,
+            }),
+            snap_to_ground: Some(CharacterLength::Absolute(0.1)),
             ..KinematicCharacterController::default()
         });
-}
-
-fn update_system(time: Res<Time>, mut controllers: Query<&mut KinematicCharacterController>) {
-    for mut controller in controllers.iter_mut() {
-        controller.translation = Some(Vec3::new(1.0, -5.0, -1.0) * time.delta_secs());
-    }
 }
 
 fn create_player_camera(mut commands: Commands) {
@@ -43,7 +48,7 @@ fn create_player_camera(mut commands: Commands) {
         Camera3d::default(),
         Transform::from_xyz(0.0, 5.0, 10.0),
         GlobalTransform::default(),
-        PlayerCamera,
+        PlayerWorldCamera,
         ThirdPersonCamera {
             sensitivity: Vec2::new(2.0, 2.0),
             zoom: Zoom::new(3.5, 12.75),

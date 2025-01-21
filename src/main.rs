@@ -2,6 +2,7 @@ mod game_client_window;
 mod environment;
 mod manager;
 mod entities;
+mod events;
 
 use bevy::prelude::*;
 
