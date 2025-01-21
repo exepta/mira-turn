@@ -2,7 +2,7 @@ mod input;
 
 use bevy::core_pipeline::bloom::Bloom;
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::{AsyncCollider, CharacterAutostep, CharacterLength, Collider, ComputedColliderShape, KinematicCharacterController, RigidBody, TriMeshFlags};
+use bevy_rapier3d::prelude::{AsyncCollider, CharacterAutostep, CharacterLength, Collider, ComputedColliderShape, Damping, KinematicCharacterController, LockedAxes, RigidBody, TriMeshFlags, Velocity};
 use bevy_third_person_camera::{Offset, ThirdPersonCamera, ThirdPersonCameraTarget, Zoom};
 use crate::entities::player::input::PlayerInputPlugin;
 use crate::entities::WorldPlayer;
@@ -27,19 +27,14 @@ fn create_world_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(Transform::from_xyz(0.0, 0.0, 0.0))
         .insert(ThirdPersonCameraTarget)
         .insert(WorldPlayer::default())
-        .insert(RigidBody::KinematicPositionBased)
+        .insert(RigidBody::Dynamic)
+        .insert(Velocity::default())
         .insert(Collider::capsule(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 1.6, 0.0), 0.2))
-        .insert(KinematicCharacterController {
-            max_slope_climb_angle: 45_f32.to_radians(),
-            min_slope_slide_angle: 30_f32.to_radians(),
-            autostep: Some(CharacterAutostep {
-                max_height: CharacterLength::Absolute(0.5),
-                min_width: CharacterLength::Absolute(0.2),
-                include_dynamic_bodies: true,
-            }),
-            snap_to_ground: Some(CharacterLength::Absolute(0.1)),
-            ..KinematicCharacterController::default()
-        });
+        .insert(Damping {
+            angular_damping: 0.5,
+            linear_damping: 0.2
+        })
+        .insert(LockedAxes::ROTATION_LOCKED_X | LockedAxes::ROTATION_LOCKED_Z);
 }
 
 fn create_player_camera(mut commands: Commands) {
