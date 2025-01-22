@@ -2,7 +2,7 @@ mod input;
 
 use bevy::core_pipeline::bloom::Bloom;
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::{AsyncCollider, CharacterAutostep, CharacterLength, Collider, ComputedColliderShape, Damping, KinematicCharacterController, LockedAxes, RigidBody, TriMeshFlags, Velocity};
+use bevy_rapier3d::prelude::{Collider, Damping, LockedAxes, RigidBody, Velocity};
 use bevy_third_person_camera::{Offset, ThirdPersonCamera, ThirdPersonCameraTarget, Zoom};
 use crate::entities::player::input::PlayerInputPlugin;
 use crate::entities::WorldPlayer;

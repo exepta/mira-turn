@@ -21,6 +21,7 @@ impl Plugin for ManagerPlugin {
 }
 
 #[derive(Component, States, Default, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[allow(dead_code)]
 pub enum GameState {
     SplashScreen,
     TitleScreen,

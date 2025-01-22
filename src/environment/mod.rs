@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
 use bevy_rapier3d::geometry::ComputedColliderShape;
-use bevy_rapier3d::prelude::{AsyncCollider, AsyncSceneCollider, RigidBody, TriMeshFlags};
+use bevy_rapier3d::prelude::{AsyncSceneCollider, RigidBody, TriMeshFlags};
 use crate::manager::GameState;
 
 pub struct EnvironmentPlugin;
